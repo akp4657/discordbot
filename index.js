@@ -5,6 +5,8 @@ const token = process.env.BOT_TOKEN;
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
+const { exec } = require('child_process');
+const cron = require('node-cron');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -19,7 +21,6 @@ for (const folder of commandFolders) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
 		if ('data' in command && 'execute' in command) {
-			console.log(command)
 			client.commands.set(command.data.name, command);
 		} else {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
@@ -40,4 +41,21 @@ for (const file of eventFiles) {
 	}
 }
 
+function runCommandBuilder() {
+	exec('node deploy-commands.js', (error, stdout, stderr) => {
+	  if (error) {
+		console.error(`Error: ${error.message}`);
+		return;
+	  }
+	  if (stderr) {
+		console.error(`Stderr: ${stderr}`);
+		return;
+	  }
+	  console.log(`Output: ${stdout}`);
+	});
+  }
+
+cron.schedule('0 0 * * *', () => runCommandBuilder())
+
+runCommandBuilder();
 client.login(token);
