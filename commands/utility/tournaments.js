@@ -17,37 +17,45 @@ module.exports = {
 				// TODO: Add game options. Possibly have a txt file DB in the code to keep track?
 				// If it's a txt file DB, it would only be populated if the game was found in start.gg
 				// This would be to avoid any "troll" names being selecatble
-				{ name: 'Week', value: 't_week' },
-				{ name: 'Month', value: 't_month' },
-				{ name: 'Three Months', value: 't_3month' },
+				{ name: 'BBCF', value: "37" },
+				{ name: 'DFC:I', value: '4267' },
+				{ name: 'Omega Strikers', value: '45263' },
+				{ name: 'Maiden & Spell', value: '34160' },
+				{ name: 'Duelists of Eden', value: '48268' },
 			)),
 	async execute(interaction) {
 		// TODO: Use the filters accordingly
 		// Filter by startDate = next day
+		// The date range will be a separate commande
+		// TODO: Command to show match history for a user per game.
+		//let userName = interaction?.member?.nickname
+		let gameValue = interaction?.options._hoistedOptions[0].value;
 		const query = ` 
-		query TournamentsByVideogames($perPage: Int, $videogameIds: [ID], $countryCode: String, $state: String) {
+		query TournamentsByVideogame($perPage: Int!, $videogameId: ID!, $countryCode: String, $state: String) {
 			tournaments(query: {
 				perPage: $perPage
 				page: 1
 				sortBy: "startAt asc"
 				filter: {
 					upcoming: true
-					videogameIds: $videogameIds
+					videogameIds: [
+						$videogameId
+					],
 					countryCode: $countryCode,
 					addrState: $state
 				}
 			}) {
 				nodes {
-				id
-				name
-				slug
+					id
+					name
+					slug
 				}
 			}
-		}`;
+		},`;
 
 		const variables = {
 			"perPage": 10,
-			"videogameIds": [37, 4267, 45263, 34168, 48268],
+			"videogameId": +gameValue,
 			"countryCode": "US",
 			"state": "NY"
 		};
@@ -61,12 +69,39 @@ module.exports = {
 				'Authorization': startgg
 			}
 		}).then(async response => {
+
+			// Start.gg doesn't return the name of the choices in the interaction. 
+			// Probably before the txt file is implemented
+			const gameQuery = `query VideogameQuery ($videogameId: ID) {
+				videogames(query: { filter: { id: [$videogameId] }, perPage: 5 }) {
+					nodes {
+						id
+						name
+					}
+				}
+			}`
+			
+			const gameVariables = { videogameId: gameValue }
+
+			let gameRes = await axios.post('https://api.start.gg/gql/alpha', {
+				query: gameQuery,
+				variables: gameVariables
+			}, {
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': startgg
+				}
+			})
+
+			console.log(response.data)
+
+			let gameName = gameRes.data.data.videogames.nodes[0].name;
 			let events = response.data.data.tournaments.nodes
 			let event_string = events.map(e => 
 				`<https://www.start.gg/${e.slug}>\n\`\`\`${e.name}\`\`\`\n`
 			).join('');
 		
-			await interaction.reply(`This command was run by ${interaction.user.username}, here are the events for your games in ${variables.state}:\n${event_string}`);
+			await interaction.reply(`This command was run by ${interaction.user.globalName}, here are the upcoming events for \`\`${gameName}\`\` in ${variables.state ? variables.state : 'the US'}:\n${event_string}`);
 		}).catch(err => {
 			console.log(err)
 		})
