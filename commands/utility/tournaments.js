@@ -10,8 +10,8 @@ module.exports = {
     .setName('tournaments')
 	.setDescription('Sends a random gif!')
 	.addStringOption(option =>
-		option.setName('category')
-			.setDescription('The gif category')
+		option.setName('game')
+			.setDescription('Select a game')
 			.setRequired(true)
 			.addChoices( 
 				// TODO: Add game options. Possibly have a txt file DB in the code to keep track?
@@ -22,14 +22,20 @@ module.exports = {
 				{ name: 'Omega Strikers', value: '45263' },
 				{ name: 'Maiden & Spell', value: '34160' },
 				{ name: 'Duelists of Eden', value: '48268' },
-			)),
+			))
+	.addStringOption(option =>
+		option.setName('state')
+			.setDescription('Enter state code (eg: NY) or leave blank for US')
+			.setRequired(false)),
 	async execute(interaction) {
 		// TODO: Use the filters accordingly
 		// Filter by startDate = next day
 		// The date range will be a separate commande
 		// TODO: Command to show match history for a user per game.
 		//let userName = interaction?.member?.nickname
-		let gameValue = interaction?.options._hoistedOptions[0].value;
+		let gameValue = interaction?.options._hoistedOptions[0]?.value;
+		let stateCode = interaction?.options._hoistedOptions[1]?.value;
+		console.log(stateCode)
 		const query = ` 
 		query TournamentsByVideogame($perPage: Int!, $videogameId: ID!, $countryCode: String, $state: String) {
 			tournaments(query: {
@@ -57,7 +63,7 @@ module.exports = {
 			"perPage": 10,
 			"videogameId": +gameValue,
 			"countryCode": "US",
-			"state": "NY"
+			"state": stateCode
 		};
 
 		axios.post('https://api.start.gg/gql/alpha', {
@@ -93,15 +99,13 @@ module.exports = {
 				}
 			})
 
-			console.log(response.data)
-
 			let gameName = gameRes.data.data.videogames.nodes[0].name;
 			let events = response.data.data.tournaments.nodes
 			let event_string = events.map(e => 
 				`<https://www.start.gg/${e.slug}>\n\`\`\`${e.name}\`\`\`\n`
 			).join('');
 		
-			await interaction.reply(`This command was run by ${interaction.user.globalName}, here are the upcoming events for \`\`${gameName}\`\` in ${variables.state ? variables.state : 'the US'}:\n${event_string}`);
+			await interaction.reply(`This command was run by ${interaction.user.globalName}, here are the upcoming events for \`\`${gameName}\`\` in ${stateCode ? stateCode : 'the US'}:\n${event_string}`);
 		}).catch(err => {
 			console.log(err)
 		})
