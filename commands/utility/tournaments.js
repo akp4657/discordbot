@@ -14,9 +14,10 @@ module.exports = {
 			.setDescription('Select a game')
 			.setRequired(true)
 			.addChoices( 
-				// TODO: Add game options. Possibly have a txt file DB in the code to keep track?
+				// DOME: Add game options. Possibly have a txt file DB in the code to keep track?
 				// If it's a txt file DB, it would only be populated if the game was found in start.gg
 				// This would be to avoid any "troll" names being selecatble
+				// ^ This has been done. Now we need to populate the options with the file name
 				{ name: 'BBCF', value: "37" },
 				{ name: 'DFC:I', value: '4267' },
 				{ name: 'Omega Strikers', value: '45263' },

@@ -9,7 +9,7 @@ module.exports = {
 		.setDescription('Gives the match history for a user.')
 		.addStringOption(option =>
 			option.setName('player')
-				.setDescription("Enter player's gamertag")
+				.setDescription("Enter player's startgg id")
 				.setRequired(true)),
 	async execute(interaction) {
 		let playerName = interaction?.options._hoistedOptions[0].value
@@ -45,18 +45,18 @@ module.exports = {
 				player(id: $playerID) {
 					id
 					sets(perPage: 5, page: 1) {
-					nodes {
-						id
-						displayScore
-						event {
+						nodes {
 							id
-							name
-							tournament {
+							displayScore
+							event {
 								id
 								name
+								tournament {
+									id
+									name
+								}
 							}
 						}
-					}
 					}
 				}
 			}`
