@@ -1,10 +1,28 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { clientId, guildId, token, startgg} = require('../../config');
 const axios = require('axios')
+const fs = require('fs');
+const path = require('path');
 let today = new Date();
 
-// TODO: Possibly add text to the query? Like /tournament $stateCode?
-// Definitely add text to the slash command for state. Default to null to grab the entire US
+// Reading the file to create an array of the game objects
+// There's some type of error/race condition happening where the value becomes undefined when
+// the build is made. Need to look into this tomorrow/Friday
+const baseDir = path.dirname(require.main.filename); // Move up to the base directory
+const filePath = path.join(baseDir, 'games.txt');
+const fileContents = fs.readFileSync(filePath, 'utf8');
+let gamesString = fileContents.trim().split('|');
+gamesString.pop();
+
+let json = gamesString.map(gs => JSON.parse(gs))
+
+console.log(json)
+let finalGames = json.map(j => ({
+	name: j.name,
+	value: j.id
+}));
+
+console.log(finalGames)
 module.exports = {
 	data: new SlashCommandBuilder()
     .setName('tournaments')

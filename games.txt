@@ -1,4 +1,1 @@
-{ name: 'BBCF', value: "37" }
-
-{ name: Maiden & Spell, value: "34160" }
-
+{"name":"DNF Duel","value":"41040"}|{"name":"Omega Strikers","value":"45263"}|

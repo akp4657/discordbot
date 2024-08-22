@@ -44,7 +44,9 @@ module.exports = {
         try{
             // We need to change the class of the name to a String(?) and then compare that to the user input
             let filteredGame = games.filter(g => String(g.name).toLowerCase().includes(gameName.toLowerCase()))[0]
-            const newGameString = `{ name: ${filteredGame.name}, value: "${filteredGame.id}" }\n`
+            const newGame = { 
+                name: filteredGame.name, value: String(filteredGame.id) 
+            }
 
             // Note: I need to comment every interaction on filestream because I'm still iffy on it
             // Define the file path
@@ -52,7 +54,7 @@ module.exports = {
             const filePath = path.join(baseDir, 'games.txt');
 
             // Write the string to the file
-            fs.appendFileSync(filePath, newGameString + '\n', 'utf8');
+            fs.appendFileSync(filePath, JSON.stringify(newGame)+'|', 'utf8');
 
             await interaction.reply(`\`\`${filteredGame.name}\`\` has been added to my list.`);
         } catch(err) {
