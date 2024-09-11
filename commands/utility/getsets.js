@@ -6,6 +6,7 @@ const { SlashCommandBuilder } = require('discord.js');
  * 2. Once we get the event, we should either filter by player or just get the whole bracket
  * 2a. The Sets in Event call just seems to take all sets-- past and upcoming. Make sure to check the schema
  * 3. The easy part is to compile this into the Discord message
+ * This is for TO use, so we'll get *ALL* upcoming sets for a tournament/event
  */
 module.exports = {
 	data: new SlashCommandBuilder()

@@ -13,13 +13,10 @@ const filePath = path.join(baseDir, 'games.txt');
 const fileContents = fs.readFileSync(filePath, 'utf8');
 let gamesString = fileContents.trim().split('|');
 gamesString.pop();
-
 let json = gamesString.map(gs => JSON.parse(gs))
-
-console.log(json)
 let finalGames = json.map(j => ({
 	name: j.name,
-	value: j.id
+	value: j.value
 }));
 
 console.log(finalGames)
@@ -31,17 +28,7 @@ module.exports = {
 		option.setName('game')
 			.setDescription('Select a game')
 			.setRequired(true)
-			.addChoices( 
-				// DOME: Add game options. Possibly have a txt file DB in the code to keep track?
-				// If it's a txt file DB, it would only be populated if the game was found in start.gg
-				// This would be to avoid any "troll" names being selecatble
-				// ^ This has been done. Now we need to populate the options with the file name
-				{ name: 'BBCF', value: "37" },
-				{ name: 'DFC:I', value: '4267' },
-				{ name: 'Omega Strikers', value: '45263' },
-				{ name: 'Maiden & Spell', value: '34160' },
-				{ name: 'Duelists of Eden', value: '48268' },
-			))
+			.addChoices( ...finalGames))
 	.addStringOption(option =>
 		option.setName('state')
 			.setDescription('Enter state code (eg: NY) or leave blank for US')
@@ -54,7 +41,6 @@ module.exports = {
 		//let userName = interaction?.member?.nickname
 		let gameValue = interaction?.options._hoistedOptions[0]?.value;
 		let stateCode = interaction?.options._hoistedOptions[1]?.value;
-		console.log(stateCode)
 		const query = ` 
 		query TournamentsByVideogame($perPage: Int!, $videogameId: ID!, $countryCode: String, $state: String) {
 			tournaments(query: {

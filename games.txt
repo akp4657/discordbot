@@ -1,1 +1,1 @@
-{"name":"DNF Duel","value":"41040"}|{"name":"Omega Strikers","value":"45263"}|
+{"name":"TEKKEN 8","value":"49783"}|{"name":"DNF Duel","value":"41040"}|{"name":"Guilty Gear Xrd REV2","value":"36"}|
