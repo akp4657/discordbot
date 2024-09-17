@@ -4,6 +4,14 @@ const axios = require('axios')
 let today = new Date();
 
 // TODO: Based on the bracket and user slug, find what upcoming matches the user has.
+/**
+ * So, we have a problem with this function now. The filter $updatedAfter is not viable as sets aren't updated
+ * until they are ran on StartGG. Often, people will only update brackets after a pool is done at majors.
+ * So, we need to get all sets after a specified date and filter based on displayScore == null
+ * If matches are updated in GraphQL when the event starts, then we can use $updatedAfter
+ * If matches are updated in GraphQL ONLY when the match is in progress, then we need to display the entire bracket
+ * Unsure of how todisplay the bracket like Tourney Bot does, that repo is no longer open sourced, sadly.
+ */
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('upcoming_sets')
@@ -43,13 +51,10 @@ module.exports = {
 			let playerTag = response.data.data.user.player.gamerTag;
 
 			const setQuery = `
-			query Sets($playerID: ID!, $updatedAfter: Timestamp!) {
+			query Sets($playerID: ID!) {
 				player(id: $playerID) {
 					id
-					sets(perPage: 5, page: 1,
-					filters: {
-						updatedAfter: $updatedAfter
-					}) {
+					sets(perPage: 15, page: 1) {
 						nodes {
 							id
 							displayScore
@@ -86,10 +91,40 @@ module.exports = {
 			//console.log(setResponse)
 			let sets = setResponse.data?.data?.player?.sets?.nodes;
 			console.log(setResponse.data)
+			console.log(sets)
 
-			let setString = sets.map(s => 
-				`**${s.event.tournament.name}** - *${s.event.name}*\n\`\`\`${s.displayScore}\`\`\`\n`
-			).join('')
+			let setString = ''
+			// sets.map(s => 
+			// 	`**${s.event.tournament.name}** - *${s.event.name}*\n\`\`\`${s.displayScore}\`\`\`\n`
+			// ).join('')
+ 
+			// Example query I was using in the StartGG portal.
+			// query Sets ($updatedAfter:Timestamp){
+			// 	player(id: 3206822) {
+			// 	  id
+			// 	  sets(perPage: 25, page: 1, filters:{updatedAfter:$updatedAfter}) {
+			// 		nodes {
+			// 		  id
+			// 		  displayScore
+			// 		  slots {
+			// 			id
+			// 			entrant {
+			// 			  id
+			// 			  name
+			// 			}
+			// 		  }
+			// 		  event {
+			// 			id
+			// 			name
+			// 			tournament {
+			// 			  id
+			// 			  name
+			// 			}
+			// 		  }
+			// 		}
+			// 	  }
+			// 	}
+			//   }
 
 			await interaction.reply(`Here are the upcoming sets for ${playerTag}:\n${setString}`);
 		})
